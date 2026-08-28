@@ -1,0 +1,62 @@
+{
+  "everything": {
+    "excluded": 0,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_everything.onnx"
+  },
+  "flow_only": {
+    "excluded": 40,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_flow_only.onnx"
+  },
+  "flow_convpost": {
+    "excluded": 41,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_flow_convpost.onnx"
+  },
+  "enc_p_only": {
+    "excluded": 37,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_enc_p_only.onnx"
+  },
+  "dp_only": {
+    "excluded": 32,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_dp_only.onnx"
+  },
+  "dec_only": {
+    "excluded": 23,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_dec_only.onnx"
+  },
+  "flow_enc_p": {
+    "excluded": 77,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_flow_enc_p.onnx"
+  },
+  "flow_dp": {
+    "excluded": 72,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_flow_dp.onnx"
+  },
+  "flow_dec": {
+    "excluded": 63,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_flow_dec.onnx"
+  },
+  "all_except_dec": {
+    "excluded": 109,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_all_except_dec.onnx"
+  },
+  "enc_p_dp": {
+    "excluded": 69,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_enc_p_dp.onnx"
+  },
+  "enc_p_dp_convpost": {
+    "excluded": 70,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_enc_p_dp_convpost.onnx"
+  }
+}

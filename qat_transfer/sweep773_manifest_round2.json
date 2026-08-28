@@ -1,0 +1,12 @@
+{
+  "enc_p_dp": {
+    "excluded": 69,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_enc_p_dp.onnx"
+  },
+  "enc_p_dp_convpost": {
+    "excluded": 70,
+    "total": 132,
+    "path": "D:\\QAT_Transfer\\qat_transfer\\sweep773_enc_p_dp_convpost.onnx"
+  }
+}
