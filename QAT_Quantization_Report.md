@@ -28,13 +28,16 @@ Ban đầu tưởng đây là 2 checkpoint của cùng một model (chỉ khác 
 
 | Model | **BanhmiTTS_v1** | **Piper (Baseline)** |
 |---|---|---|
-| **Tổng lớp Conv/ConvTranspose (đo trực tiếp từ ONNX graph)** | **160** | **132** |
-| flow (normalizing flow) | ~64 | 40 |
-| dec (BigVGAN decoder, gồm conv_post) | 24 | 23 |
+| **Tổng lớp Conv/ConvTranspose trong ONNX graph đã export cho inference** | **160** | **132** |
+| enc_p (text encoder) | 37 | 37 |
+| dp (duration predictor, nhánh inference) | 32 | 32 |
+| dec (BigVGAN decoder, gồm conv_post) | 24 (+1 do f0_cond) | 23 |
+| flow (normalizing flow) | 64 | 40 |
 | f0_predictor | có (3 lớp) | **không có** |
-| *enc_p + dp (phần còn lại, quantize được)* | *~72* | *69 (enc_p 37 + dp 32)* |
 
-*Ghi chú: với BanhmiTTS_v1, số liệu enc_p/dp riêng lẻ không đo trực tiếp qua ONNX graph — chỉ có số lớp "wrap" lúc QAT training (tính cả Linear, xem mục 2.3) là enc_p=37, dp=80, nên không cộng thẳng vào cột Conv/ConvTranspose ở đây để tránh nhầm hai loại đơn vị khác nhau.*
+*Ghi chú quan trọng — hai phạm vi đếm khác nhau:*
+- *Bảng trên đếm node trên **ONNX graph đã export cho `model_g.infer()`** — đúng phạm vi ảnh hưởng tới quantization/export, khớp chính xác với log thật của `export_int8.py` (`"Quantizing 95/160"` cho BanhmiTTS_v1, `"62/132"` cho Piper).*
+- *`dp` (StochasticDurationPredictor) có kiến trúc `nn.Module` đầy đủ lớn hơn nhiều — đếm qua `named_modules()` trên toàn bộ model_g cho ra **80 lớp**, vì module này có thêm nhánh `post_pre/post_convs/post_flows` chỉ dùng lúc **training** (tính ELBO) mà `infer(reverse=True)` không bao giờ chạy tới. Tương tự, model_g còn có **`enc_q` (PosteriorEncoder, 34 lớp)** — dùng để tính KL loss lúc training, **không xuất hiện trong ONNX export** nên không ảnh hưởng gì tới quantization. Cả hai loại "phần training-only" này không nằm trong phạm vi bảng trên.*
 
 → Piper (Baseline) có **flow nông hơn nhiều** (40 vs 64 lớp) và **thiếu hẳn module F0 predictor**. Đây gần như chắc chắn là một thử nghiệm kiến trúc cũ/khác, không phải cùng dòng training với BanhmiTTS_v1.
 
@@ -52,7 +55,7 @@ Hệ quả quan trọng nhất: **layer nào "nhạy cảm" khi quantize hoá ra
 `enc_p` + `dp` + `dec` (trừ `conv_post`) + `f0_predictor` = **95/160 lớp Conv/ConvTranspose** (59%).
 
 ### 2.3. Quy trình QAT
-- Wrap **143 lớp** (Conv1d/ConvTranspose1d/Linear — tính cả Linear nên nhiều hơn con số Conv/ConvTranspose ở trên) tại `enc_p` (37), `dp` (80), `dec` trừ `conv_post` (23), `f0_predictor` (3).
+- Wrap **143 lớp** (Conv1d/ConvTranspose1d/Linear) tại `enc_p` (37), `dp` (80), `dec` trừ `conv_post` (23), `f0_predictor` (3). Con số này lớn hơn 95 (số lớp thực sự bị quantize ở mục 2.2) vì QAT wrap toàn bộ `nn.Module` — gồm cả nhánh `post_pre/post_convs/post_flows` của `dp` chỉ dùng lúc training (xem ghi chú ở mục 1) — trong khi export chỉ quantize phần thực sự xuất hiện trên ONNX graph inference.
 - LR: 5e-6 → 5e-7 (giảm dần 10x qua 150 epoch), discriminator warmup 1 epoch đầu.
 - Train qua nhiều lần chạy nối tiếp (resume liên tục), tổng ~150 epoch = ~60,000 bước, gần đạt mốc 10% của 844,560 bước training gốc theo khuyến nghị NVIDIA.
 - **Best checkpoint: epoch 62** (val_loss_mel=20.7220). Từ epoch 62 → 150 (88 epoch thêm) không có cải thiện nào — training đã bão hòa.
